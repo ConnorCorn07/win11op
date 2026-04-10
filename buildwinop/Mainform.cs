@@ -161,7 +161,8 @@ namespace Win11Optimizer
                 Font      = FONT_BODY,
                 ForeColor = TEXTDIM,
                 AutoSize  = true,
-                Location  = new Point(12, 482)
+                Location  = new Point(12, 482),
+                BackColor = BG
             };
             Controls.Add(lblStatus);
 
@@ -397,7 +398,7 @@ namespace Win11Optimizer
             Bounds      = bounds;
             Font        = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             ForeColor   = Color.FromArgb(10, 10, 14);
-            BackColor   = Color.Transparent;
+            BackColor   = Color.FromArgb(10, 10, 14);
             Cursor      = Cursors.Hand;
             SetStyle(ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint |

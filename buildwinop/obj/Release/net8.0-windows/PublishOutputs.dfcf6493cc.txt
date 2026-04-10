@@ -1,0 +1,5 @@
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\publish\Win11Optimizer.exe
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\publish\Win11Optimizer.dll
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\publish\Win11Optimizer.deps.json
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\publish\Win11Optimizer.runtimeconfig.json
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\publish\Win11Optimizer.pdb

@@ -1,0 +1,15 @@
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\Win11Optimizer.exe
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\Win11Optimizer.deps.json
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\Win11Optimizer.runtimeconfig.json
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\Win11Optimizer.dll
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\bin\Release\net8.0-windows\Win11Optimizer.pdb
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\Win11optimizer.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\Win11optimizer.AssemblyInfoInputs.cache
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\Win11optimizer.AssemblyInfo.cs
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\Win11optimizer.csproj.CoreCompileInputs.cache
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\Win11optimizer.sourcelink.json
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\Win11Optimizer.dll
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\refint\Win11Optimizer.dll
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\Win11Optimizer.pdb
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\Win11optimizer.genruntimeconfig.cache
+C:\Users\Sm!le\Documents\VS Repos\Win11Op\win11op\buildwinop\obj\Release\net8.0-windows\ref\Win11Optimizer.dll
