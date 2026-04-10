@@ -31,12 +31,15 @@ namespace Win11Optimizer
         static readonly Font FONT_BTN   = new Font("Segoe UI", 9.5f, FontStyle.Bold);
 
         // ── Controls ─────────────────────────────────────────────────────
+#pragma warning disable CS8618
         CheckBox chkPerf, chkPrivacy, chkResponsive, chkGaming, chkNetwork, chkBloat;
         GlowButton btnRunSelected, btnRunAll;
         RichTextBox logBox;
         Panel progressBar;
         Label lblStatus;
         Panel sideAccent;
+        Label _passLabel, _failLabel;
+#pragma warning restore CS8618
         int _totalTweaks, _doneTweaks;
 
         public MainForm()
@@ -56,7 +59,7 @@ namespace Win11Optimizer
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox     = false;
 
-            // ── Left accent bar 
+            // ── Left accent bar ───────────────────────────────────────────
             sideAccent = new Panel
             {
                 Bounds    = new Rectangle(0, 0, 4, Height),
@@ -90,7 +93,7 @@ namespace Win11Optimizer
                 ForeColor = TEXT,
                 AutoSize  = true,
                 Location  = new Point(20, 14),
-                BackColor = Color.Transparent
+                BackColor = Color.FromArgb(18, 18, 24)  // SURFACE
             };
             header.Controls.Add(lblTitle);
 
@@ -101,7 +104,7 @@ namespace Win11Optimizer
                 ForeColor = TEXTDIM,
                 AutoSize  = true,
                 Location  = new Point(23, 50),
-                BackColor = Color.Transparent
+                BackColor = Color.FromArgb(18, 18, 24)  // SURFACE
             };
             header.Controls.Add(lblSub);
 
@@ -180,9 +183,6 @@ namespace Win11Optimizer
             Log("Win11 Optimizer ready. Select tweaks and click Run.", TEXTDIM);
         }
 
-        // ── Summary label refs ────────────────────────────────────────────
-        Label _passLabel, _failLabel;
-
         // ── Helper: card panel ────────────────────────────────────────────
         Panel MakeCard(Rectangle bounds, string title)
         {
@@ -209,7 +209,7 @@ namespace Win11Optimizer
                 ForeColor = TEXTDIM,
                 AutoSize  = true,
                 Location  = new Point(12, 18),
-                BackColor = Color.Transparent
+                BackColor = Color.FromArgb(24, 24, 32)  // CARD
             };
             card.Controls.Add(lbl);
             Controls.Add(card);
@@ -226,7 +226,7 @@ namespace Win11Optimizer
                 ForeColor = TEXT,
                 Location  = new Point(14, y),
                 AutoSize  = true,
-                BackColor = Color.Transparent,
+                BackColor = Color.FromArgb(24, 24, 32),  // CARD
                 Checked   = false
             };
             chk.FlatStyle = FlatStyle.Flat;
@@ -239,7 +239,7 @@ namespace Win11Optimizer
                 ForeColor = TEXTDIM,
                 Location  = new Point(36, y + 20),
                 AutoSize  = true,
-                BackColor = Color.Transparent
+                BackColor = Color.FromArgb(24, 24, 32)  // CARD
             };
             parent.Controls.Add(chk);
             parent.Controls.Add(desc);
@@ -248,10 +248,9 @@ namespace Win11Optimizer
 
         void StyleCheckbox(CheckBox chk)
         {
-            chk.FlatAppearance.BorderColor    = BORDER;
+            chk.FlatAppearance.BorderColor        = BORDER;
             chk.FlatAppearance.CheckedBackColor   = ACCENT;
-            chk.FlatAppearance.UncheckedColor = CARD;
-            chk.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            chk.FlatAppearance.MouseOverBackColor = Color.FromArgb(24, 24, 32);  // CARD
         }
 
         // ── Helper: info line ─────────────────────────────────────────────
@@ -264,7 +263,7 @@ namespace Win11Optimizer
                 ForeColor = col,
                 Location  = new Point(14, y),
                 Size      = new Size(parent.Width - 28, 18),
-                BackColor = Color.Transparent
+                BackColor = Color.FromArgb(24, 24, 32)  // CARD
             });
         }
 
@@ -289,7 +288,7 @@ namespace Win11Optimizer
                 ForeColor = col,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Bounds    = new Rectangle(0, 6, 110, 34),
-                BackColor = Color.Transparent
+                BackColor = Color.FromArgb(10, 10, 14)
             };
             var sub = new Label
             {
@@ -298,7 +297,7 @@ namespace Win11Optimizer
                 ForeColor = TEXTDIM,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Bounds    = new Rectangle(0, 42, 110, 20),
-                BackColor = Color.Transparent
+                BackColor = Color.FromArgb(10, 10, 14)
             };
             box.Controls.Add(num);
             box.Controls.Add(sub);
@@ -400,8 +399,7 @@ namespace Win11Optimizer
             ForeColor   = Color.FromArgb(10, 10, 14);
             BackColor   = Color.Transparent;
             Cursor      = Cursors.Hand;
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
-                     ControlStyles.AllPaintingInWmPaint |
+            SetStyle(ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint |
                      ControlStyles.DoubleBuffer, true);
         }
@@ -443,9 +441,38 @@ namespace Win11Optimizer
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+
+                Application.ThreadException += (s, e) => LogCrash(e.Exception);
+                AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+                    LogCrash(e.ExceptionObject as Exception);
+
+                Application.Run(new MainForm());
+            }
+            catch (Exception ex)
+            {
+                LogCrash(ex);
+            }
+        }
+
+        static void LogCrash(Exception? ex)
+        {
+            try
+            {
+                string logPath = System.IO.Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory, "crash.log");
+                string msg = $"[{DateTime.Now}]\n{ex}\n\n";
+                System.IO.File.AppendAllText(logPath, msg);
+                MessageBox.Show(
+                    $"Crash logged to:\n{logPath}\n\n{ex?.Message}",
+                    "Win11Optimizer — Startup Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            catch { }
         }
     }
 }

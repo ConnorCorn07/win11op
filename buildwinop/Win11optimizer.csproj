@@ -9,13 +9,6 @@
     <AssemblyName>Win11Optimizer</AssemblyName>
     <RootNamespace>Win11Optimizer</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-
-    <!-- Single-file self-contained publish settings -->
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
 </Project>

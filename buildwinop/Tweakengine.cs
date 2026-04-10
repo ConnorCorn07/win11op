@@ -2,17 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Win32;
+#nullable disable warnings
 
-namespace Win11Optimizer{
+namespace Win11Optimizer
+{
     public static class TweakEngine
     {
         // --- RESULT TRACKING ---
 
         public class TweakResult
         {
-            public string Name    { get; set; }
-            public bool   Success { get; set; }
-            public string Error   { get; set; }
+            public string  Name    { get; set; } = string.Empty;
+            public bool    Success { get; set; }
+            public string? Error   { get; set; }
         }
 
         private static readonly List<TweakResult> _results = new();
