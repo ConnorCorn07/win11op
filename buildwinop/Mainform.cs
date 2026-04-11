@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -245,17 +246,25 @@ namespace Win11Optimizer
             {
                 Dock        = DockStyle.Fill,
                 ColumnCount = 1,
-                RowCount    = 2,
+                RowCount    = 3,
                 BackColor   = BG,
                 Padding     = new Padding(4, 0, 0, 0)
             };
-            rightCol.RowStyles.Add(new RowStyle(SizeType.Percent, 45));
-            rightCol.RowStyles.Add(new RowStyle(SizeType.Percent, 55));
+            rightCol.RowStyles.Add(new RowStyle(SizeType.Percent, 30));  // system info
+            rightCol.RowStyles.Add(new RowStyle(SizeType.Percent, 30));  // notes
+            rightCol.RowStyles.Add(new RowStyle(SizeType.Percent, 40));  // summary
             body.Controls.Add(rightCol, 1, 0);
+
+            // ── System info card ──────────────────────────────────────────
+            var sysCard = MakeCardDock("SYSTEM INFO");
+            rightCol.Controls.Add(sysCard, 0, 0);
+            var sysInner = new Panel { Dock = DockStyle.Fill, BackColor = CARD, Padding = new Padding(10, 34, 10, 6) };
+            sysCard.Controls.Add(sysInner);
+            BuildSystemInfoPanel(sysInner);
 
             // Notes card
             var infoCard = MakeCardDock("NOTES");
-            rightCol.Controls.Add(infoCard, 0, 0);
+            rightCol.Controls.Add(infoCard, 0, 1);
             var infoInner = new Panel { Dock = DockStyle.Fill, BackColor = CARD, Padding = new Padding(10, 34, 10, 10) };
             infoCard.Controls.Add(infoInner);
             AddInfoLineDock(infoInner, ACCENT,  "• Run as Administrator for registry & service access.");
@@ -265,7 +274,7 @@ namespace Win11Optimizer
 
             // Summary card
             var sumCard = MakeCardDock("LAST RUN SUMMARY");
-            rightCol.Controls.Add(sumCard, 0, 1);
+            rightCol.Controls.Add(sumCard, 0, 2);
             var sumInner = new Panel { Dock = DockStyle.Fill, BackColor = CARD, Padding = new Padding(10, 34, 10, 10) };
             sumCard.Controls.Add(sumInner);
 
@@ -335,7 +344,6 @@ namespace Win11Optimizer
         CheckBox MakeCheckRowDock(TableLayoutPanel parent, int row, string title, string subtitle,
                                   string category, out GlowButton undoBtn)
         {
-            // Layout: checkbox+desc fill left, undo button docked right
             var cell = new TableLayoutPanel
             {
                 Dock        = DockStyle.Fill,
@@ -344,8 +352,9 @@ namespace Win11Optimizer
                 RowCount    = 1
             };
             cell.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            cell.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 72));
+            cell.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80));
 
+            // Left side — checkbox + subtitle
             var left = new Panel { Dock = DockStyle.Fill, BackColor = CARD };
             var chk = new CheckBox
             {
@@ -353,7 +362,7 @@ namespace Win11Optimizer
                 Font      = FONT_LABEL,
                 ForeColor = TEXT,
                 AutoSize  = true,
-                Location  = new Point(6, 2),
+                Location  = new Point(6, 4),
                 BackColor = CARD,
                 FlatStyle = FlatStyle.Flat
             };
@@ -366,26 +375,172 @@ namespace Win11Optimizer
                 Font      = FONT_BODY,
                 ForeColor = TEXTDIM,
                 AutoSize  = true,
-                Location  = new Point(26, 22),
+                Location  = new Point(26, 24),
                 BackColor = CARD
             };
             left.Controls.Add(chk);
             left.Controls.Add(desc);
 
-            // Undo button — hidden until category has been applied
-            undoBtn = new GlowButton("↩ UNDO", DANGER, new Rectangle(0, 0, 68, 32))
+            // Right side — centred undo button wrapper
+            var btnWrapper = new Panel
             {
-                Dock    = DockStyle.None,
-                Anchor  = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
-                Visible = TweakEngine.HasBackup(category),
-                Margin  = new Padding(2)
+                Dock      = DockStyle.Fill,
+                BackColor = CARD,
+                Padding   = new Padding(4, 0, 4, 0)
             };
-            undoBtn.Dock = DockStyle.Fill;
 
-            cell.Controls.Add(left,    0, 0);
-            cell.Controls.Add(undoBtn, 1, 0);
+            undoBtn = new GlowButton("↩ UNDO", DANGER, new Rectangle(0, 0, 72, 30))
+            {
+                Visible = TweakEngine.HasBackup(category)
+            };
+
+            // Copy to local so it can be captured by the lambda (out params can't be used in lambdas)
+            var btn = undoBtn;
+
+            // Centre the button vertically when the wrapper resizes
+            btnWrapper.Resize += (s, e) =>
+            {
+                btn.Width    = btnWrapper.Width - 8;
+                btn.Height   = 30;
+                btn.Location = new Point(4, (btnWrapper.Height - btn.Height) / 2);
+            };
+
+            btnWrapper.Controls.Add(btn);
+            cell.Controls.Add(left,       0, 0);
+            cell.Controls.Add(btnWrapper, 1, 0);
             parent.Controls.Add(cell, 0, row);
             return chk;
+        }
+
+        void BuildSystemInfoPanel(Panel parent)
+        {
+            var layout = new TableLayoutPanel
+            {
+                Dock        = DockStyle.Fill,
+                ColumnCount = 2,
+                BackColor   = CARD
+            };
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62));
+
+            var keys = new[] { "OS", "CPU", "RAM", "GPU" };
+            var valueLabels = new Dictionary<string, Label>();
+
+            foreach (var key in keys)
+            {
+                layout.RowStyles.Add(new RowStyle(SizeType.Percent, 25));
+                layout.RowCount++;
+
+                layout.Controls.Add(new Label
+                {
+                    Text         = key,
+                    Font         = new Font("Segoe UI", 9f, FontStyle.Bold),
+                    ForeColor    = TEXTDIM,
+                    Dock         = DockStyle.Fill,
+                    TextAlign    = ContentAlignment.MiddleLeft,
+                    BackColor    = CARD,
+                    Padding      = new Padding(4, 0, 0, 0)
+                });
+
+                var valLbl = new Label
+                {
+                    Text         = "Loading…",
+                    Font         = new Font("Segoe UI", 9f, FontStyle.Regular),
+                    ForeColor    = TEXT,
+                    Dock         = DockStyle.Fill,
+                    TextAlign    = ContentAlignment.MiddleLeft,
+                    BackColor    = CARD,
+                    AutoEllipsis = true
+                };
+                layout.Controls.Add(valLbl);
+                valueLabels[key] = valLbl;
+            }
+
+            parent.Controls.Add(layout);
+
+            // Query everything on a background thread so UI doesn't freeze
+            Task.Run(() =>
+            {
+                try
+                {
+                    string os  = ReadRegistry(
+                        @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion",
+                        "ProductName", "Unknown Windows");
+                    string build = ReadRegistry(
+                        @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion",
+                        "CurrentBuildNumber", "");
+                    string displayVersion = ReadRegistry(
+                        @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion",
+                        "DisplayVersion", "");
+
+                    string cpu = ReadRegistry(
+                        @"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0",
+                        "ProcessorNameString", "Unknown CPU").Trim();
+
+                    // RAM from environment — total physical memory via GlobalMemoryStatusEx via a quick PS call
+                    string ram = RunAndCapture("powershell",
+                        "-NoProfile -Command \"[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory/1GB)\"");
+                    ram = string.IsNullOrWhiteSpace(ram) ? "Unknown" : $"{ram.Trim()} GB";
+
+                    // GPU from registry
+                    string gpu = ReadRegistry(
+                        @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Video",
+                        "", "");
+                    // GPU fallback via PowerShell
+                    if (string.IsNullOrWhiteSpace(gpu) || gpu == "Unknown")
+                        gpu = RunAndCapture("powershell",
+                            "-NoProfile -Command \"(Get-CimInstance Win32_VideoController | Select-Object -First 1).Name\"").Trim();
+                    if (string.IsNullOrWhiteSpace(gpu)) gpu = "Unknown";
+
+                    string osDisplay = string.IsNullOrWhiteSpace(displayVersion)
+                        ? $"{os} (Build {build})"
+                        : $"{os} {displayVersion} (Build {build})";
+
+                    Invoke(new Action(() =>
+                    {
+                        valueLabels["OS"].Text  = osDisplay;
+                        valueLabels["CPU"].Text = cpu;
+                        valueLabels["RAM"].Text = ram;
+                        valueLabels["GPU"].Text = gpu;
+                    }));
+                }
+                catch (Exception ex)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        foreach (var lbl in valueLabels.Values) lbl.Text = "Unavailable";
+                        Debug.WriteLine($"[SYSINFO] {ex.Message}");
+                    }));
+                }
+            });
+        }
+
+        static string ReadRegistry(string keyPath, string valueName, string fallback)
+        {
+            try
+            {
+                var val = Microsoft.Win32.Registry.GetValue(keyPath, valueName, null);
+                return val?.ToString() ?? fallback;
+            }
+            catch { return fallback; }
+        }
+
+        static string RunAndCapture(string exe, string args)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo(exe, args)
+                {
+                    CreateNoWindow         = true,
+                    UseShellExecute        = false,
+                    RedirectStandardOutput = true
+                };
+                using var p = Process.Start(psi);
+                string output = p.StandardOutput.ReadToEnd().Trim();
+                p.WaitForExit();
+                return output;
+            }
+            catch { return ""; }
         }
 
         void AddInfoLineDock(Panel parent, Color col, string text)
