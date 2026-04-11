@@ -216,14 +216,25 @@ namespace Win11Optimizer
 
         public static void ApplyNetworkTweaks()
         {
+            // Disable Nagle's Algorithm on all adapters (reduces latency for games)
             DisableNaglesAlgorithm();
-            RunCommand("netsh int tcp set global autotuninglevel=normal", "TCP auto-tuning: normal");
+
+            // Enable Receive Side Scaling
             RunCommand("netsh int tcp set global rss=enabled", "Enable RSS");
-            RunCommand("netsh int tcp set global ecncapability=enabled", "Enable ECN");
-            RunCommand("netsh int tcp set global chimney=disabled", "Disable TCP chimney offload");
+
+            // TCP auto-tuning — keep at normal for balanced throughput
+            RunCommand("netsh int tcp set global autotuninglevel=normal", "TCP auto-tuning: normal");
+
+            // NOTE: ECN and chimney offload removed — these hurt general browsing
+            // on many home routers and modern NICs respectively.
+
+            // Reduce network throttling index for games/media
+            // (does not affect general browsing bandwidth)
             SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
                         "NetworkThrottlingIndex", unchecked((int)0xffffffff), RegistryValueKind.DWord,
                         "Disable network throttling");
+
+            // System responsiveness for games
             SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
                         "SystemResponsiveness", 0, RegistryValueKind.DWord, "Max multimedia responsiveness");
         }
