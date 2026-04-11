@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using Microsoft.Win32;
-#nullable disable
+#nullable disable warnings
 
 namespace Win11Optimizer
 {
@@ -16,7 +16,7 @@ namespace Win11Optimizer
         {
             public string  Name    { get; set; } = string.Empty;
             public bool    Success { get; set; }
-            public string Error   { get; set; }
+            public string? Error   { get; set; }
         }
 
         private static readonly List<TweakResult> _results = new();
@@ -228,7 +228,10 @@ namespace Win11Optimizer
 
         private static void RunCategory(string category, Action tweaks)
         {
-            _currentCategory = category;
+            // If a backup already exists for this category, don't overwrite it —
+            // that would back up already-tweaked values instead of original Windows defaults
+            bool alreadyBacked = _appliedCategories.Contains(category);
+            _currentCategory = alreadyBacked ? "" : category;
             tweaks();
             _currentCategory = "";
             _appliedCategories.Add(category);

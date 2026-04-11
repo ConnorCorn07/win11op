@@ -669,6 +669,37 @@ namespace Win11Optimizer
 
             btnRunSelected.Enabled = btnRunAll.Enabled = true;
             RefreshUndoButtons();
+
+            // ── Reboot prompt ─────────────────────────────────────────────
+            PromptReboot();
+        }
+
+        void PromptReboot()
+        {
+            var result = MessageBox.Show(
+                "Some tweaks require a reboot to take full effect.\n\nWould you like to reboot now?",
+                "Reboot Required",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2); // default to No so user doesn't accidentally reboot
+
+            if (result == DialogResult.Yes)
+            {
+                Log("Initiating reboot…", WARN);
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName        = "shutdown.exe",
+                    Arguments       = "/r /t 10 /c \"Win11 Optimizer: Rebooting to apply tweaks.\"",
+                    UseShellExecute = false,
+                    CreateNoWindow  = true
+                });
+                // Give user 10 seconds to see the message before the app closes
+                MessageBox.Show(
+                    "Your PC will reboot in 10 seconds.\n\nTo cancel, open a command prompt and run:\n  shutdown /a",
+                    "Rebooting in 10 seconds",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
         }
     }
 
