@@ -504,128 +504,6 @@ namespace Win11Optimizer
             return num;
         }
 
-        // ── Helper: card panel ────────────────────────────────────────────
-        Panel MakeCard(Rectangle bounds, string title)
-        {
-            var card = new Panel
-            {
-                Bounds    = bounds,
-                BackColor = CARD
-            };
-            card.Paint += (s, e) =>
-            {
-                var g = e.Graphics;
-                using var pen = new Pen(BORDER);
-                g.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
-                // top accent line
-                using var br = new LinearGradientBrush(
-                    new Rectangle(0, 0, card.Width, 2), ACCENT, ACCENT2,
-                    LinearGradientMode.Horizontal);
-                g.FillRectangle(br, 0, 0, card.Width, 2);
-            };
-            var lbl = new Label
-            {
-                Text      = title,
-                Font      = new Font("Segoe UI", 7.5f, FontStyle.Bold),
-                ForeColor = TEXTDIM,
-                AutoSize  = true,
-                Location  = new Point(12, 18),
-                BackColor = Color.FromArgb(24, 24, 32)  // CARD
-            };
-            card.Controls.Add(lbl);
-            Controls.Add(card);
-            return card;
-        }
-
-        // ── Helper: checkbox row ──────────────────────────────────────────
-        (CheckBox chk, Label desc) MakeCheckRow(Panel parent, int y, string title, string subtitle)
-        {
-            var chk = new CheckBox
-            {
-                Text      = title,
-                Font      = FONT_LABEL,
-                ForeColor = TEXT,
-                Location  = new Point(14, y),
-                AutoSize  = true,
-                BackColor = Color.FromArgb(24, 24, 32),  // CARD
-                Checked   = false
-            };
-            chk.FlatStyle = FlatStyle.Flat;
-            StyleCheckbox(chk);
-
-            var desc = new Label
-            {
-                Text      = subtitle,
-                Font      = FONT_BODY,
-                ForeColor = TEXTDIM,
-                Location  = new Point(36, y + 20),
-                AutoSize  = true,
-                BackColor = Color.FromArgb(24, 24, 32)  // CARD
-            };
-            parent.Controls.Add(chk);
-            parent.Controls.Add(desc);
-            return (chk, desc);
-        }
-
-        void StyleCheckbox(CheckBox chk)
-        {
-            chk.FlatAppearance.BorderColor        = BORDER;
-            chk.FlatAppearance.CheckedBackColor   = ACCENT;
-            chk.FlatAppearance.MouseOverBackColor = Color.FromArgb(24, 24, 32);  // CARD
-        }
-
-        // ── Helper: info line ─────────────────────────────────────────────
-        void AddInfoLine(Panel parent, int y, Color col, string text)
-        {
-            parent.Controls.Add(new Label
-            {
-                Text      = text,
-                Font      = FONT_BODY,
-                ForeColor = col,
-                Location  = new Point(14, y),
-                Size      = new Size(parent.Width - 28, 18),
-                BackColor = Color.FromArgb(24, 24, 32)  // CARD
-            });
-        }
-
-        // ── Helper: summary box ───────────────────────────────────────────
-        Label AddSummaryBox(Panel parent, int x, Color col, string count, string title)
-        {
-            var box = new Panel
-            {
-                Bounds    = new Rectangle(x, 44, 110, 70),
-                BackColor = BG
-            };
-            box.Paint += (s, e) =>
-            {
-                using var pen = new Pen(col) { Width = 1.5f };
-                e.Graphics.DrawRectangle(pen, 0, 0, box.Width - 1, box.Height - 1);
-            };
-
-            var num = new Label
-            {
-                Text      = count,
-                Font      = new Font("Segoe UI", 22f, FontStyle.Bold),
-                ForeColor = col,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new Rectangle(0, 6, 110, 34),
-                BackColor = Color.FromArgb(10, 10, 14)
-            };
-            var sub = new Label
-            {
-                Text      = title,
-                Font      = FONT_BODY,
-                ForeColor = TEXTDIM,
-                TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new Rectangle(0, 42, 110, 20),
-                BackColor = Color.FromArgb(10, 10, 14)
-            };
-            box.Controls.Add(num);
-            box.Controls.Add(sub);
-            parent.Controls.Add(box);
-            return num;   // return number label so we can update it
-        }
-
         // ── Undo button visibility ────────────────────────────────────────
         void RefreshUndoButtons()
         {
@@ -880,7 +758,7 @@ namespace Win11Optimizer
             }
         }
 
-        static void LogCrash(Exception ex)
+        static void LogCrash(Exception? ex)
         {
             try
             {
