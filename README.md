@@ -2,8 +2,6 @@
 
 A clean, open-source Windows 11 optimizer built in C# / WinForms. Designed to be dropped onto a fresh Windows install and run once to apply performance, privacy, gaming, and network tweaks — with full per-category undo support.
 
-THIS WAS VIBE CODED USING GENERATIVE AI - (Claude, ofc)
-
 ---
 
 ## Features
@@ -66,3 +64,6 @@ Every registry change is backed up before being applied. After running a categor
 ## License
 
 MIT — see [LICENSE](LICENSE)
+
+AI WARNING:
+THIS HAS SNIPPITS AND PIECES OF CODE MADE BY AI - GENERATIVE AI
