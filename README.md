@@ -24,7 +24,7 @@ Every registry change is backed up before being applied. After running a categor
 
 - Windows 10 or 11 (64-bit)
 - [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Must be run as **Administrator**
+- Administrator Privileges
 
 ---
 
