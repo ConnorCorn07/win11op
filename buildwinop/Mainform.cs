@@ -41,6 +41,7 @@ namespace Win11Optimizer
         public bool   IsAdvanced  { get; set; }
         public bool   DefaultOn   { get; set; } = true;
         public string AdvancedKey { get; set; }
+        public string TweakKey    { get; set; }  // unique key for individual dispatch
     }
 
     public static class TweakCatalog
@@ -49,221 +50,289 @@ namespace Win11Optimizer
         {
             // ── PERFORMANCE ───────────────────────────────────────────────
             new TweakEntry { Category = "Performance", Icon = "⚡", DefaultOn = true,
+                TweakKey    = "Perf_PowerPlan",
                 Name = "High Performance Power Plan",
                 Description = "Switches power plan to maximum performance mode" },
             new TweakEntry { Category = "Performance", Icon = "🔋", DefaultOn = true,
+                TweakKey    = "Perf_PowerThrottle",
                 Name = "Disable Power Throttling",
                 Description = "Prevents Windows throttling background CPU usage" },
             new TweakEntry { Category = "Performance", Icon = "🗂", DefaultOn = true,
+                TweakKey    = "Perf_SysMain",
                 Name = "Disable SysMain (Superfetch)",
                 Description = "Stops preloading rarely-used apps into RAM" },
             new TweakEntry { Category = "Performance", Icon = "🔍", DefaultOn = true,
+                TweakKey    = "Perf_WSearch",
                 Name = "Disable Windows Search Indexer",
                 Description = "Removes background disk I/O from search indexing" },
             new TweakEntry { Category = "Performance", Icon = "⏱", DefaultOn = true,
+                TweakKey    = "Perf_StartupDelay",
                 Name = "Remove Startup Delay",
                 Description = "Eliminates the artificial Explorer startup pause" },
             new TweakEntry { Category = "Performance", Icon = "🖼", DefaultOn = true,
+                TweakKey    = "Perf_VisualFX",
                 Name = "Visual Effects: Best Performance",
                 Description = "Turns off animations, shadows and fancy rendering" },
             new TweakEntry { Category = "Performance", Icon = "📁", DefaultOn = true,
+                TweakKey    = "Perf_NtfsLastAccess",
                 Name = "Disable NTFS Last-Access Timestamps",
                 Description = "Reduces filesystem writes on every file read" },
             new TweakEntry { Category = "Performance", Icon = "📄", DefaultOn = true,
+                TweakKey    = "Perf_8Dot3",
                 Name = "Disable 8.3 Filenames",
                 Description = "Removes legacy short filename generation on NTFS" },
             new TweakEntry { Category = "Performance", Icon = "💤", DefaultOn = true,
+                TweakKey    = "Perf_Hibernate",
                 Name = "Disable Hibernation",
                 Description = "Frees several GB of disk space, speeds shutdown" },
             new TweakEntry { Category = "Performance", Icon = "🧠", DefaultOn = true,
+                TweakKey    = "Perf_MemCompression",
                 Name = "Disable Memory Compression",
                 Description = "Reduces CPU overhead when RAM is under pressure" },
 
             new TweakEntry { Category = "Performance", Icon = "⏰", DefaultOn = true,
+                TweakKey    = "Perf_TimerRes",
                 Name = "Set Timer Resolution to 0.5ms",
                 Description = "Calls timeBeginPeriod(1) + registry key for sub-ms scheduler ticks" },
             // ── PRIVACY ───────────────────────────────────────────────────
             new TweakEntry { Category = "Privacy", Icon = "📡", DefaultOn = true,
+                TweakKey    = "Priv_Telemetry",
                 Name = "Disable Telemetry",
                 Description = "Blocks Microsoft data collection at the registry level" },
             new TweakEntry { Category = "Privacy", Icon = "🛑", DefaultOn = true,
+                TweakKey    = "Priv_DiagTrack",
                 Name = "Disable DiagTrack Service",
                 Description = "Stops the Connected User Experiences telemetry service" },
             new TweakEntry { Category = "Privacy", Icon = "📢", DefaultOn = true,
+                TweakKey    = "Priv_AdvertisingId",
                 Name = "Disable Advertising ID",
                 Description = "Prevents apps from accessing your ad tracking ID" },
             new TweakEntry { Category = "Privacy", Icon = "🔎", DefaultOn = true,
+                TweakKey    = "Priv_BingStart",
                 Name = "Disable Bing in Start Menu",
                 Description = "Removes web search results from the Start search bar" },
             new TweakEntry { Category = "Privacy", Icon = "🎙", DefaultOn = true,
+                TweakKey    = "Priv_Cortana",
                 Name = "Disable Cortana Consent",
                 Description = "Turns off Cortana data collection consent flag" },
             new TweakEntry { Category = "Privacy", Icon = "📊", DefaultOn = true,
+                TweakKey    = "Priv_ActivityFeed",
                 Name = "Disable Activity Feed",
                 Description = "Stops Windows logging app and file activity history" },
             new TweakEntry { Category = "Privacy", Icon = "📍", DefaultOn = true,
+                TweakKey    = "Priv_Location",
                 Name = "Disable Location Tracking",
                 Description = "Blocks apps from accessing your physical location" },
             new TweakEntry { Category = "Privacy", Icon = "📷", DefaultOn = true,
+                TweakKey    = "Priv_Camera",
                 Name = "Block App Camera Access",
                 Description = "Prevents UWP apps from using the webcam by default" },
             new TweakEntry { Category = "Privacy", Icon = "⚠", DefaultOn = true,
+                TweakKey    = "Priv_WER",
                 Name = "Disable Windows Error Reporting",
                 Description = "Stops crash dumps and reports being sent to Microsoft" },
             new TweakEntry { Category = "Privacy", Icon = "🛡", DefaultOn = true,
+                TweakKey    = "Priv_SmartScreen",
                 Name = "Disable SmartScreen (Explorer)",
                 Description = "Removes SmartScreen cloud checks in File Explorer" },
             new TweakEntry { Category = "Privacy", Icon = "🗓", DefaultOn = true,
+                TweakKey    = "Priv_TelemetryTasks",
                 Name = "Disable Scheduled Telemetry Tasks",
                 Description = "Kills CEIP, AppraiserV2, Proxy and DiskDiag data tasks" },
             new TweakEntry { Category = "Privacy", Icon = "👁", DefaultOn = true,
+                TweakKey    = "Priv_AppTracking",
                 Name = "Disable App Launch Tracking",
                 Description = "Stops Windows logging which apps you open and when" },
             new TweakEntry { Category = "Privacy", Icon = "💬", DefaultOn = true,
+                TweakKey    = "Priv_Feedback",
                 Name = "Disable Feedback Requests",
                 Description = "Prevents Windows asking you to rate/review features" },
 
             new TweakEntry { Category = "Privacy", Icon = "💬", DefaultOn = true,
+                TweakKey    = "Priv_ChatIcon",
                 Name = "Disable Chat / Teams Taskbar Icon",
                 Description = "Removes the Teams/Chat pinned icon from the taskbar" },
             new TweakEntry { Category = "Privacy", Icon = "🤖", DefaultOn = true,
+                TweakKey    = "Priv_Recall",
                 Name = "Disable Windows Recall",
                 Description = "Kills AI screenshot feature on Copilot+ PCs (no-op otherwise)" },
             new TweakEntry { Category = "Privacy", Icon = "🚫", DefaultOn = true,
+                TweakKey    = "Priv_HostsBlock",
                 Name = "Block Telemetry Hosts",
                 Description = "Adds 35 Microsoft telemetry domains to the hosts file (0.0.0.0)" },
             // ── RESPONSIVENESS ────────────────────────────────────────────
             new TweakEntry { Category = "Responsiveness", Icon = "🖱", DefaultOn = true,
+                TweakKey    = "Resp_MenuDelay",
                 Name = "Instant Menu Show",
                 Description = "Sets menu open delay to 0 ms for snappier menus" },
             new TweakEntry { Category = "Responsiveness", Icon = "⚡", DefaultOn = true,
+                TweakKey    = "Resp_AppKill",
                 Name = "Fast App Kill Timeout",
                 Description = "Reduces wait time before force-killing frozen apps" },
             new TweakEntry { Category = "Responsiveness", Icon = "⏹", DefaultOn = true,
+                TweakKey    = "Resp_ServiceKill",
                 Name = "Fast Service Kill Timeout",
                 Description = "Cuts shutdown wait for slow-stopping services" },
             new TweakEntry { Category = "Responsiveness", Icon = "🔚", DefaultOn = true,
+                TweakKey    = "Resp_AutoEndTasks",
                 Name = "Auto End Tasks on Shutdown",
                 Description = "Automatically kills hung apps instead of prompting" },
             new TweakEntry { Category = "Responsiveness", Icon = "⏱", DefaultOn = true,
+                TweakKey    = "Resp_PlatformTick",
                 Name = "Platform Tick (High-Res Timer)",
                 Description = "Forces constant-rate high-resolution system timer" },
             new TweakEntry { Category = "Responsiveness", Icon = "💡", DefaultOn = true,
+                TweakKey    = "Resp_WinTips",
                 Name = "Disable Windows Tips",
                 Description = "Stops the 'Did you know...' popups and suggestions" },
             new TweakEntry { Category = "Responsiveness", Icon = "📰", DefaultOn = true,
+                TweakKey    = "Resp_SuggestedContent",
                 Name = "Disable Suggested Content",
                 Description = "Removes app install suggestions from the Start menu" },
 
             // ── GAMING ────────────────────────────────────────────────────
             new TweakEntry { Category = "Gaming", Icon = "🖥", DefaultOn = false,
+                TweakKey    = "Game_HAGS",
                 Name = "Enable HAGS",
                 Description = "Hardware-Accelerated GPU Scheduling — reduces GPU latency" },
             new TweakEntry { Category = "Gaming", Icon = "🎮", DefaultOn = false,
+                TweakKey    = "Game_GameMode",
                 Name = "Enable Game Mode",
                 Description = "Tells Windows to prioritize foreground game processes" },
             new TweakEntry { Category = "Gaming", Icon = "🖱", DefaultOn = false,
+                TweakKey    = "Game_MouseAccel",
                 Name = "Disable Mouse Acceleration",
                 Description = "Removes pointer precision for 1:1 raw mouse input" },
             new TweakEntry { Category = "Gaming", Icon = "⚡", DefaultOn = false,
+                TweakKey    = "Game_CPUPriority",
                 Name = "CPU Foreground Priority Boost",
                 Description = "Increases CPU time slice for the active window/game" },
             new TweakEntry { Category = "Gaming", Icon = "📹", DefaultOn = false,
+                TweakKey    = "Game_DVR",
                 Name = "Disable Game DVR / Capture",
                 Description = "Turns off Xbox Game Bar background recording" },
             new TweakEntry { Category = "Gaming", Icon = "🪟", DefaultOn = false,
+                TweakKey    = "Game_FSO",
                 Name = "Disable Fullscreen Optimisations",
                 Description = "Forces exclusive fullscreen for lower input latency" },
 
             new TweakEntry { Category = "Gaming", Icon = "🎯", DefaultOn = false,
+                TweakKey    = "Game_GPUPower",
                 Name = "GPU Power: Prefer Maximum Performance",
                 Description = "Sets D3D power policy to never downclock the GPU" },
             new TweakEntry { Category = "Gaming", Icon = "🟢", DefaultOn = false,
+                TweakKey    = "Game_NvidiaTelemetry",
                 Name = "Disable NVIDIA Telemetry Services",
                 Description = "Stops NvTelemetryContainer & NvDisplayContainerLS phoning home" },
             // ── NETWORK ───────────────────────────────────────────────────
             new TweakEntry { Category = "Network", Icon = "📶", DefaultOn = false,
+                TweakKey    = "Net_Nagle",
                 Name = "Disable Nagle's Algorithm",
                 Description = "Reduces TCP packet buffering — lowers game ping" },
             new TweakEntry { Category = "Network", Icon = "🔁", DefaultOn = false,
+                TweakKey    = "Net_RSS",
                 Name = "Enable Receive-Side Scaling",
                 Description = "Spreads network processing across CPU cores" },
             new TweakEntry { Category = "Network", Icon = "🎛", DefaultOn = false,
+                TweakKey    = "Net_TCPAutoTune",
                 Name = "TCP Auto-Tuning: Normal",
                 Description = "Enables adaptive TCP receive buffer scaling" },
             new TweakEntry { Category = "Network", Icon = "🚦", DefaultOn = false,
+                TweakKey    = "Net_Throttle",
                 Name = "Disable Network Throttling Index",
                 Description = "Removes multimedia network rate caps" },
             new TweakEntry { Category = "Network", Icon = "🏎", DefaultOn = false,
+                TweakKey    = "Net_MMResponsive",
                 Name = "Max Multimedia Responsiveness",
                 Description = "Sets SystemResponsiveness to 0 for games/audio" },
 
             new TweakEntry { Category = "Network", Icon = "🔐", DefaultOn = false,
+                TweakKey    = "Net_DoH",
                 Name = "DNS over HTTPS (Cloudflare 1.1.1.1)",
                 Description = "Enables DoH via Windows DNS Client, routes queries encrypted" },
             // ── BLOATWARE ─────────────────────────────────────────────────
             new TweakEntry { Category = "Bloatware", Icon = "📰", DefaultOn = false,
+                TweakKey    = "Bloat_Bing",
                 Name = "Remove Bing News & Weather",
                 Description = "Uninstalls BingNews and BingWeather UWP packages" },
             new TweakEntry { Category = "Bloatware", Icon = "🎵", DefaultOn = false,
+                TweakKey    = "Bloat_Zune",
                 Name = "Remove Zune Music / Video",
                 Description = "Removes the legacy Groove Music and Movies & TV apps" },
             new TweakEntry { Category = "Bloatware", Icon = "♟", DefaultOn = false,
+                TweakKey    = "Bloat_Solitaire",
                 Name = "Remove Solitaire Collection",
                 Description = "Uninstalls the ad-supported Solitaire game suite" },
             new TweakEntry { Category = "Bloatware", Icon = "🗺", DefaultOn = false,
+                TweakKey    = "Bloat_Maps",
                 Name = "Remove Windows Maps",
                 Description = "Strips the built-in Maps UWP application" },
             new TweakEntry { Category = "Bloatware", Icon = "📱", DefaultOn = false,
+                TweakKey    = "Bloat_PhoneLink",
                 Name = "Remove Phone Link / Your Phone",
                 Description = "Removes the Android phone companion app" },
             new TweakEntry { Category = "Bloatware", Icon = "🎬", DefaultOn = false,
+                TweakKey    = "Bloat_Clipchamp",
                 Name = "Remove Clipchamp",
                 Description = "Removes the bundled Microsoft video editor" },
             new TweakEntry { Category = "Bloatware", Icon = "🎮", DefaultOn = false,
+                TweakKey    = "Bloat_Xbox",
                 Name = "Remove Xbox Apps & Overlays",
                 Description = "Strips Xbox TCUI, App, GameOverlay, GamingOverlay" },
             new TweakEntry { Category = "Bloatware", Icon = "🛒", DefaultOn = false,
+                TweakKey    = "Bloat_AdTiles",
                 Name = "Remove Third-Party Ad Tiles",
                 Description = "Removes LinkedIn, Disney, Spotify, TikTok, Instagram tiles" },
             new TweakEntry { Category = "Bloatware", Icon = "📦", DefaultOn = false,
+                TweakKey    = "Bloat_Office",
                 Name = "Remove Office Hub & OneNote",
                 Description = "Uninstalls the bundled Office Hub and OneNote UWP apps" },
             new TweakEntry { Category = "Bloatware", Icon = "🗃", DefaultOn = false,
+                TweakKey    = "Bloat_3D",
                 Name = "Remove 3D Viewer & Print 3D",
                 Description = "Removes legacy 3D apps nobody asked for" },
 
             // ── SECURITY HARDENING ──────────────────────────────────────────────
             new TweakEntry { Category = "Security", Icon = "🔇", DefaultOn = false,
+                TweakKey    = "Sec_AutoRun",
                 Name = "Disable AutoRun / AutoPlay",
                 Description = "Blocks autorun.inf and AutoPlay on all drive types" },
             new TweakEntry { Category = "Security", Icon = "🖥", DefaultOn = false,
+                TweakKey    = "Sec_RDP",
                 Name = "Disable Remote Desktop (RDP)",
                 Description = "Refuses all inbound RDP connections, closes firewall rule" },
             new TweakEntry { Category = "Security", Icon = "🪟", DefaultOn = false,
+                TweakKey    = "Sec_SMBv1",
                 Name = "Disable SMBv1",
                 Description = "Removes the WannaCry/EternalBlue-vulnerable SMBv1 protocol" },
             new TweakEntry { Category = "Security", Icon = "📡", DefaultOn = false,
+                TweakKey    = "Sec_NetBIOS",
                 Name = "Disable NetBIOS over TCP/IP",
                 Description = "Stops NetBIOS on all adapters — prevents NBNS poisoning" },
             new TweakEntry { Category = "Security", Icon = "🛡", DefaultOn = false,
+                TweakKey    = "Sec_Defender",
                 Name = "Ensure Defender Real-Time Protection",
                 Description = "Forces Defender real-time monitoring ON via policy + cmdlet" },
 
             // ── ADVANCED ──────────────────────────────────────────────────
             new TweakEntry { Category = "Advanced", Icon = "⚙", DefaultOn = false, IsAdvanced = true, AdvancedKey = "ProcessorScheduling",
+                TweakKey    = "Adv_ProcessorScheduling",
                 Name = "Processor Scheduling: Programs",
                 Description = "Win32PrioritySeparation=38, max foreground CPU boost" },
             new TweakEntry { Category = "Advanced", Icon = "⏱", DefaultOn = false, IsAdvanced = true, AdvancedKey = "DisableDynamicTick",
+                TweakKey    = "Adv_DynamicTick",
                 Name = "Disable Dynamic Tick",
                 Description = "Forces constant high-res IRQ8 timer, reduces micro-stutter" },
             new TweakEntry { Category = "Advanced", Icon = "🔥", DefaultOn = false, IsAdvanced = true, AdvancedKey = "DisableCpuThrottling",
+                TweakKey    = "Adv_CPUThrottle",
                 Name = "Disable CPU Throttling",
                 Description = "Prevents Windows pulling background process CPU clocks" },
             new TweakEntry { Category = "Advanced", Icon = "💾", DefaultOn = false, IsAdvanced = true, AdvancedKey = "EnableTrim",
+                TweakKey    = "Adv_TRIM",
                 Name = "Ensure SSD TRIM Enabled",
                 Description = "Sets disabledeletenotify=0, keeps SSD write speeds consistent" },
             new TweakEntry { Category = "Advanced", Icon = "🎨", DefaultOn = false, IsAdvanced = true, AdvancedKey = "AggressiveAnimations",
+                TweakKey    = "Adv_Animations",
                 Name = "Aggressive Animation Disabling",
                 Description = "Kills UserPreferencesMask, TaskbarAnim, MinAnimate bits" },
         };
@@ -382,7 +451,7 @@ namespace Win11Optimizer
         private static readonly string[] SidebarCategories =
         {
             "All", "Performance", "Privacy", "Responsiveness",
-            "Gaming", "Network", "Bloatware", "Advanced", "Security", "History"
+            "Gaming", "Network", "Bloatware", "Security", "Advanced", "History"
         };
 
         private static readonly Dictionary<string, string> CatEmoji = new()
@@ -694,7 +763,7 @@ namespace Win11Optimizer
         private static readonly string[] CategoryOrder =
         {
             "Performance", "Privacy", "Responsiveness",
-            "Gaming", "Network", "Bloatware", "Advanced", "Security"
+            "Gaming", "Network", "Bloatware", "Security", "Advanced"
         };
 
         private void PopulateGrid(string filter)
@@ -883,7 +952,7 @@ namespace Win11Optimizer
         // ─────────────────────────────────────────────────────────────────
         private void BuildBottomBar()
         {
-            _bottomBar = new Panel { BackColor = Theme.SURFACE, Height = 110 };
+            _bottomBar = new Panel { BackColor = Theme.SURFACE, Height = 130 };
             _bottomBar.Paint += (s, e) =>
             {
                 using var p = new Pen(Theme.BORDER);
@@ -893,7 +962,7 @@ namespace Win11Optimizer
             _progOuter = new Panel
             {
                 BackColor = Theme.BORDER,
-                Location  = new Point(16, 14),
+                Location  = new Point(16, 12),
                 Size      = new Size(500, 6)
             };
             _progInner = new Panel
@@ -909,7 +978,7 @@ namespace Win11Optimizer
                 Text      = "Ready",
                 ForeColor = Theme.TEXT_SEC,
                 AutoSize  = true,
-                Location  = new Point(16, 26)
+                Location  = new Point(16, 24)
             };
 
             _selCountLabel = new Label
@@ -917,7 +986,7 @@ namespace Win11Optimizer
                 Text      = "No tweaks selected",
                 ForeColor = Theme.TEXT_SEC,
                 AutoSize  = true,
-                Location  = new Point(530, 14)
+                Location  = new Point(16, 46)
             };
 
             _restoreChk = new CheckBox
@@ -927,7 +996,7 @@ namespace Win11Optimizer
                 BackColor = Color.Transparent,
                 Checked   = true,
                 AutoSize  = true,
-                Location  = new Point(16, 62),
+                Location  = new Point(16, 86),
                 FlatStyle = FlatStyle.Flat
             };
             _restoreChk.FlatAppearance.BorderColor        = Theme.BORDER;
@@ -960,11 +1029,11 @@ namespace Win11Optimizer
             _bottomBar.SizeChanged += (s, e) =>
             {
                 int r = _bottomBar.Width - 16;
-                _runBtn.Location   = new Point(r - 160, 58);
-                _clearBtn.Location = new Point(r - 300, 58);
-                _undoBtn.Location  = new Point(r - 460, 58);
-                logToggle.Location = new Point(r - 82,  14);
-                _progOuter.Width   = Math.Max(200, r - 620);
+                _runBtn.Location   = new Point(r - 160, 82);
+                _clearBtn.Location = new Point(r - 300, 82);
+                _undoBtn.Location  = new Point(r - 460, 82);
+                logToggle.Location = new Point(r - 82,  12);
+                _progOuter.Width   = Math.Max(200, r - 16);
             };
 
             _bottomBar.Controls.AddRange(new Control[]
@@ -1047,22 +1116,6 @@ namespace Win11Optimizer
             _runBtn.Text    = "⏳ Running...";
             TweakEngine.ClearResults();
 
-            var cats = selected.Select(t => t.Entry.Category).Distinct().ToHashSet();
-            bool doPerf  = cats.Contains("Performance");
-            bool doPriv  = cats.Contains("Privacy");
-            bool doResp  = cats.Contains("Responsiveness");
-            bool doGame  = cats.Contains("Gaming");
-            bool doNet   = cats.Contains("Network");
-            bool doBloat = cats.Contains("Bloatware");
-            bool doAdv      = cats.Contains("Advanced");
-            bool doSecurity = cats.Contains("Security");
-
-            // Collect advanced keys from checked advanced tiles
-            _advancedKeys = selected
-                .Where(t => t.Entry.IsAdvanced && t.Entry.AdvancedKey != null)
-                .Select(t => t.Entry.AdvancedKey)
-                .ToHashSet();
-
             // Restore point
             bool rpCreated = false;
             if (_restoreChk.Checked)
@@ -1075,55 +1128,78 @@ namespace Win11Optimizer
                 rpCreated = ok;
             }
 
-            _totalTweaks = (doPerf ? 10 : 0) + (doPriv ? 16 : 0) + (doResp ? 7 : 0)
-                         + (doGame ? 8 : 0) + (doNet ? 6 : 0) + (doBloat ? 10 : 0)
-                         + (doAdv ? _advancedKeys.Count : 0) + (doSecurity ? 5 : 0);
-            _doneTweaks = 0;
+            _totalTweaks = selected.Count;
+            _doneTweaks  = 0;
             SetProgress(0, _totalTweaks);
 
             var catNames   = new List<string>();
             var logDetails = new List<string>();
             int prevCount  = 0;
 
-            void LogSection(string name)
+            void LogTweak(string tileName)
             {
                 var all = TweakEngine.GetResults();
                 var sec = all.Skip(prevCount).ToList();
                 prevCount = all.Count;
-                int ok  = sec.Count(r => r.Success);
-                int bad = sec.Count(r => !r.Success);
-                AppendLog($"┌─ {name}  ({ok} ok, {bad} failed)");
                 foreach (var r in sec)
                 {
-                    AppendLog(r.Success ? $"│  ✔  {r.Name}" : $"│  ✘  {r.Name}: {r.Error}");
+                    AppendLog(r.Success ? $"  ✔  {r.Name}" : $"  ✘  {r.Name}: {r.Error}");
                     logDetails.Add((r.Success ? "✔ " : "✘ ") + r.Name);
                 }
-                AppendLog("└─────────────────────────────────────");
             }
 
             foreach (var t in selected) t.SetStatus(TileStatus.Running);
 
             await Task.Run(() =>
             {
-                void Tick(string msg)
+                // Group selected tiles by category order for logical sequencing,
+                // but only apply the individual tweaks that were actually checked.
+                var ordered = selected
+                    .OrderBy(t => Array.IndexOf(new[] {
+                        "Performance","Privacy","Responsiveness",
+                        "Gaming","Network","Bloatware","Security","Advanced"
+                    }, t.Entry.Category))
+                    .ToList();
+
+                string lastCat = null;
+                foreach (var tile in ordered)
                 {
-                    _doneTweaks++;
+                    var entry = tile.Entry;
+                    if (entry.Category != lastCat)
+                    {
+                        if (lastCat != null)
+                            Invoke(new Action(() => AppendLog("└─────────────────────────────────────")));
+                        Invoke(new Action(() => AppendLog($"┌─ {entry.Category.ToUpper()}")));
+                        if (!catNames.Contains(entry.Category))
+                            catNames.Add(entry.Category);
+                        lastCat = entry.Category;
+                    }
+
                     Invoke(new Action(() =>
                     {
+                        _doneTweaks++;
                         SetProgress(_doneTweaks, _totalTweaks);
-                        AppendLog(msg);
+                        AppendLog($"  → {entry.Name}…");
                     }));
-                }
 
-                if (doPerf)  { catNames.Add("Performance");    Tick("→ Performance tweaks…");     TweakEngine.ApplyPerformanceTweaks();                    Invoke(new Action(() => LogSection("PERFORMANCE"))); }
-                if (doPriv)  { catNames.Add("Privacy");        Tick("→ Privacy tweaks…");          TweakEngine.ApplyPrivacyTweaks();                        Invoke(new Action(() => LogSection("PRIVACY"))); }
-                if (doResp)  { catNames.Add("Responsiveness"); Tick("→ Responsiveness tweaks…");   TweakEngine.ApplySystemResponsiveness();                 Invoke(new Action(() => LogSection("RESPONSIVENESS"))); }
-                if (doGame)  { catNames.Add("Gaming");         Tick("→ Gaming tweaks…");           TweakEngine.ApplyGamingTweaks();                         Invoke(new Action(() => LogSection("GAMING"))); }
-                if (doNet)   { catNames.Add("Network");        Tick("→ Network tweaks…");          TweakEngine.ApplyNetworkTweaks();                        Invoke(new Action(() => LogSection("NETWORK"))); }
-                if (doBloat) { catNames.Add("Bloatware");      TweakEngine.RemoveBloatware(m => Tick(m));                                                   Invoke(new Action(() => LogSection("BLOATWARE"))); }
-                if (doAdv && _advancedKeys.Count > 0)
-                             { catNames.Add("Advanced");       Tick("→ Advanced tweaks…");         TweakEngine.ApplyAdvancedTweaks(_advancedKeys);          Invoke(new Action(() => LogSection("ADVANCED"))); }
-                if (doSecurity){ catNames.Add("Security");     Tick("→ Security hardening…");      TweakEngine.ApplySecurityTweaks();                       Invoke(new Action(() => LogSection("SECURITY"))); }
+                    // Bloatware tiles share one pattern-based engine call
+                    if (entry.Category == "Bloatware")
+                    {
+                        TweakEngine.ApplyBloatwareTweak(entry.TweakKey);
+                    }
+                    else if (entry.IsAdvanced && entry.AdvancedKey != null)
+                    {
+                        TweakEngine.ApplyAdvancedTweak(entry.AdvancedKey);
+                    }
+                    else
+                    {
+                        TweakEngine.ApplyTweak(entry.TweakKey);
+                    }
+
+                    Invoke(new Action(() => LogTweak(entry.Name)));
+                }
+                if (lastCat != null)
+                    Invoke(new Action(() => AppendLog("└─────────────────────────────────────")));
             });
 
             var results = TweakEngine.GetResults();
@@ -1283,7 +1359,7 @@ namespace Win11Optimizer
         public TweakTile(TweakEntry entry)
         {
             Entry     = entry;
-            Size      = new Size(230, 110);
+            Size      = new Size(230, 130);
             BackColor = Theme.SURFACE;
             Margin    = new Padding(5);
             Cursor    = Cursors.Hand;
@@ -1359,8 +1435,8 @@ namespace Win11Optimizer
                 Font      = new Font("Segoe UI", 7.5f),
                 ForeColor = Theme.TEXT_SEC,
                 AutoSize  = false,
-                Size      = new Size(218, 30),
-                Location  = new Point(10, 68),
+                Size      = new Size(218, 38),
+                Location  = new Point(10, 74),
                 BackColor = Color.Transparent
             };
 
@@ -1374,7 +1450,7 @@ namespace Win11Optimizer
                 ForeColor = badgeFg,
                 BackColor = badgeBg,
                 AutoSize  = true,
-                Location  = new Point(10, 50),
+                Location  = new Point(10, 52),
                 Padding   = new Padding(3, 1, 3, 1)
             };
 

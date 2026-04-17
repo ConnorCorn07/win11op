@@ -1,0 +1,53 @@
+[
+  {
+    "Timestamp": "2026-04-17 01:14:02",
+    "WindowsVer": "Windows 11 25H2 (Build 26200)",
+    "Categories": "Privacy",
+    "Passed": 1,
+    "Failed": 0,
+    "RestorePoint": true,
+    "Details": [
+      "\u2714 Disable SmartScreen"
+    ]
+  },
+  {
+    "Timestamp": "2026-04-17 01:07:54",
+    "WindowsVer": "Windows 11 25H2 (Build 26200)",
+    "Categories": "Privacy",
+    "Passed": 24,
+    "Failed": 6,
+    "RestorePoint": false,
+    "Details": [
+      "\u2714 Disable telemetry",
+      "\u2714 Disable telemetry (legacy key)",
+      "\u2718 Disable service: DiagTrack",
+      "\u2718 Disable service: dmwappushservice",
+      "\u2718 Disable service: RetailDemo",
+      "\u2718 Disable service: WerSvc",
+      "\u2718 Disable task: \\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser",
+      "\u2718 Disable task: \\Microsoft\\Windows\\Application Experience\\ProgramDataUpdater",
+      "\u2714 Disable task: \\Microsoft\\Windows\\Autochk\\Proxy",
+      "\u2714 Disable task: \\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator",
+      "\u2714 Disable task: \\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip",
+      "\u2714 Disable task: \\Microsoft\\Windows\\DiskDiagnostic\\Microsoft-Windows-DiskDiagnosticDataCollector",
+      "\u2714 Disable Advertising ID",
+      "\u2714 Disable Advertising ID (policy)",
+      "\u2714 Disable Bing in Start",
+      "\u2714 Disable app launch tracking",
+      "\u2714 Disable Bing Search integration",
+      "\u2714 Disable Cortana consent",
+      "\u2714 Disable Activity Feed",
+      "\u2714 Disable publishing user activities",
+      "\u2714 Disable uploading user activities",
+      "\u2714 Disable feedback requests",
+      "\u2714 Disable location tracking",
+      "\u2714 Block app camera access",
+      "\u2714 Disable Windows Error Reporting",
+      "\u2714 Disable SmartScreen (Explorer)",
+      "\u2714 Disable Chat/Teams taskbar icon",
+      "\u2714 Disable Windows Recall (AI screenshot)",
+      "\u2714 Disable Windows Recall (user scope)",
+      "\u2714 Block 36 telemetry domains in hosts file"
+    ]
+  }
+]

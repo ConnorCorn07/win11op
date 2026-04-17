@@ -1,0 +1,10 @@
+[
+  {
+    "Category": "Privacy",
+    "KeyPath": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+    "ValueName": "EnableSmartScreen",
+    "ValueData": "0",
+    "ValueKind": "DWord",
+    "Existed": true
+  }
+]
