@@ -260,50 +260,6 @@ namespace Win11Optimizer
             SaveBackups();
         }
 
-        // ── 1. PERFORMANCE ────────────────────────────────────────────────
-        public static void ApplyPerformanceTweaks() => RunCategory("Performance", () =>
-        {
-            RunCommand("powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
-                "High Performance power plan");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling",
-                "PowerThrottlingOff", 1, RegistryValueKind.DWord, "Disable Power Throttling");
-            DisableService("SysMain");
-            DisableService("WSearch");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize",
-                "StartupDelayInMSec", 0, RegistryValueKind.DWord, "Remove startup delay");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
-                "VisualFXSetting", 2, RegistryValueKind.DWord, "Visual effects: best performance");
-            RunCommand("fsutil behavior set disablelastaccess 1", "Disable NTFS last-access updates");
-            RunCommand("fsutil behavior set disable8dot3 1",      "Disable 8.3 filenames");
-            RunCommand("powercfg -h off", "Disable hibernation");
-            RunPowerShell("Disable-MMAgent -MemoryCompression", "Disable memory compression");
-
-            // ── NEW: Set timer resolution to 0.5 ms ──────────────────────
-            // timeBeginPeriod(1) is the standard 1 ms call; the minimum the
-            // Windows multimedia timer supports in-process is actually 0.5 ms
-            // on most hardware when called with uPeriod = 1 and the process
-            // holds it open. We persist the setting via the registry key that
-            // tells the kernel scheduler to run at its highest resolution.
-            try
-            {
-                TimeBeginPeriod(1);   // request 1 ms (effective ~0.5 ms on Win11)
-                _results.Add(new TweakResult
-                    { Name = "Set timer resolution to 0.5 ms (timeBeginPeriod)", Success = true });
-            }
-            catch (Exception ex)
-            {
-                _results.Add(new TweakResult
-                    { Name = "Set timer resolution", Success = false, Error = ex.Message });
-            }
-
-            // Registry key that keeps high-res timer on across reboots
-            EnsureRegistryKey(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel",
-                "GlobalTimerResolutionRequests", 1, RegistryValueKind.DWord,
-                "Persist high-res timer (GlobalTimerResolutionRequests)");
-        });
-
         public static List<TweakResult> UndoPerformanceTweaks()
         {
             var r = RestoreCategory("Performance");
@@ -319,79 +275,6 @@ namespace Win11Optimizer
             try { TimeEndPeriod(1); } catch { }
             return r;
         }
-
-        // ── 2. PRIVACY ────────────────────────────────────────────────────
-        public static void ApplyPrivacyTweaks() => RunCategory("Privacy", () =>
-        {
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection",
-                "AllowTelemetry", 0, RegistryValueKind.DWord, "Disable telemetry");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection",
-                "AllowTelemetry", 0, RegistryValueKind.DWord, "Disable telemetry (legacy key)");
-            DisableService("DiagTrack");
-            DisableService("dmwappushservice");
-            DisableService("RetailDemo");
-            DisableService("WerSvc");
-            DisableScheduledTask(@"\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser");
-            DisableScheduledTask(@"\Microsoft\Windows\Application Experience\ProgramDataUpdater");
-            DisableScheduledTask(@"\Microsoft\Windows\Autochk\Proxy");
-            DisableScheduledTask(@"\Microsoft\Windows\Customer Experience Improvement Program\Consolidator");
-            DisableScheduledTask(@"\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip");
-            DisableScheduledTask(@"\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
-                "Enabled", 0, RegistryValueKind.DWord, "Disable Advertising ID");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo",
-                "DisabledByGroupPolicy", 1, RegistryValueKind.DWord, "Disable Advertising ID (policy)");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer",
-                "DisableSearchBoxSuggestions", 1, RegistryValueKind.DWord, "Disable Bing in Start");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                "Start_TrackProgs", 0, RegistryValueKind.DWord, "Disable app launch tracking");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search",
-                "BingSearchEnabled", 0, RegistryValueKind.DWord, "Disable Bing Search integration");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search",
-                "CortanaConsent", 0, RegistryValueKind.DWord, "Disable Cortana consent");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System",
-                "EnableActivityFeed", 0, RegistryValueKind.DWord, "Disable Activity Feed");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System",
-                "PublishUserActivities", 0, RegistryValueKind.DWord, "Disable publishing user activities");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System",
-                "UploadUserActivities", 0, RegistryValueKind.DWord, "Disable uploading user activities");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Siuf\Rules",
-                "NumberOfSIUFInPeriod", 0, RegistryValueKind.DWord, "Disable feedback requests");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
-                "DisableLocation", 1, RegistryValueKind.DWord, "Disable location tracking");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy",
-                "LetAppsAccessCamera", 2, RegistryValueKind.DWord, "Block app camera access");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting",
-                "Disabled", 1, RegistryValueKind.DWord, "Disable Windows Error Reporting");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System",
-                "EnableSmartScreen", 0, RegistryValueKind.DWord, "Disable SmartScreen (Explorer)");
-
-            // ── NEW: Disable Chat / Teams taskbar icon ────────────────────
-            EnsureRegistryKey(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced");
-            SetRegistry(
-                @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-                "TaskbarMn", 0, RegistryValueKind.DWord,
-                "Disable Chat/Teams taskbar icon");
-
-            // ── NEW: Disable Windows Recall (Copilot+ AI screenshot feature) ─
-            // Recall stores snapshots of everything on screen — a serious privacy risk.
-            // DisableAIDataAnalysis=1 turns it off; the feature only exists on
-            // Copilot+ PCs so this is a no-op on other hardware.
-            EnsureRegistryKey(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsAI");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
-                "DisableAIDataAnalysis", 1, RegistryValueKind.DWord,
-                "Disable Windows Recall (AI screenshot)");
-            // Belt-and-suspenders: also set the user-scope key
-            EnsureRegistryKey(@"HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\WindowsAI");
-            SetRegistry(
-                @"HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\WindowsAI",
-                "DisableAIDataAnalysis", 1, RegistryValueKind.DWord,
-                "Disable Windows Recall (user scope)");
-
-            // ── NEW: Block telemetry domains in hosts file ────────────────
-            ApplyHostsBlockList();
-        });
 
         public static List<TweakResult> UndoPrivacyTweaks()
         {
@@ -505,27 +388,6 @@ namespace Win11Optimizer
             }
         }
 
-        // ── 3. RESPONSIVENESS ─────────────────────────────────────────────
-        public static void ApplySystemResponsiveness() => RunCategory("Responsiveness", () =>
-        {
-            SetRegistry(@"HKEY_CURRENT_USER\Control Panel\Desktop",
-                "MenuShowDelay", "0", RegistryValueKind.String, "Instant menu show");
-            SetRegistry(@"HKEY_CURRENT_USER\Control Panel\Desktop",
-                "WaitToKillAppTimeout", "2000", RegistryValueKind.String, "Fast app kill timeout");
-            SetRegistry(@"HKEY_CURRENT_USER\Control Panel\Desktop",
-                "HungAppTimeout", "1000", RegistryValueKind.String, "Fast hung app timeout");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control",
-                "WaitToKillServiceTimeout", "2000", RegistryValueKind.String, "Fast service kill timeout");
-            SetRegistry(@"HKEY_CURRENT_USER\Control Panel\Desktop",
-                "AutoEndTasks", "1", RegistryValueKind.String, "Auto end tasks on shutdown");
-            RunCommand("bcdedit /set useplatformtick yes", "Platform tick (high-res timer)");
-            RunCommand("bcdedit /deletevalue useplatformclock 2>nul", "Remove platform clock override");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                "SoftLandingEnabled", 0, RegistryValueKind.DWord, "Disable Windows Tips");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
-                "SubscribedContent-338389Enabled", 0, RegistryValueKind.DWord, "Disable suggested content");
-        });
-
         public static List<TweakResult> UndoResponsivenessTweaks()
         {
             var r = RestoreCategory("Responsiveness");
@@ -533,113 +395,13 @@ namespace Win11Optimizer
             return r;
         }
 
-        // ── 4. GAMING ─────────────────────────────────────────────────────
-        public static void ApplyGamingTweaks() => RunCategory("Gaming", () =>
-        {
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers",
-                "HwSchMode", 2, RegistryValueKind.DWord, "Enable HAGS");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\GameBar",
-                "AllowAutoGameMode", 1, RegistryValueKind.DWord, "Enable Game Mode");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\GameBar",
-                "AutoGameModeEnabled", 1, RegistryValueKind.DWord, "Enable Auto Game Mode");
-            SetRegistry(@"HKEY_CURRENT_USER\Control Panel\Mouse",
-                "MouseSpeed", "0", RegistryValueKind.String, "Disable mouse acceleration");
-            SetRegistry(@"HKEY_CURRENT_USER\Control Panel\Mouse",
-                "MouseThreshold1", "0", RegistryValueKind.String, "Mouse threshold 1");
-            SetRegistry(@"HKEY_CURRENT_USER\Control Panel\Mouse",
-                "MouseThreshold2", "0", RegistryValueKind.String, "Mouse threshold 2");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl",
-                "Win32PrioritySeparation", 38, RegistryValueKind.DWord, "CPU foreground priority boost");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\GameDVR",
-                "AppCaptureEnabled", 0, RegistryValueKind.DWord, "Disable Game DVR capture");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\GameDVR",
-                "AllowGameDVR", 0, RegistryValueKind.DWord, "Disable Game DVR (policy)");
-            SetRegistry(@"HKEY_CURRENT_USER\System\GameConfigStore",
-                "GameDVR_FSEBehaviorMode", 2, RegistryValueKind.DWord, "Disable FSO globally");
-            SetRegistry(@"HKEY_CURRENT_USER\System\GameConfigStore",
-                "GameDVR_HonorUserFSEBehaviorMode", 1, RegistryValueKind.DWord, "Honor FSO setting");
-
-            // ── NEW: GPU Power Management — Prefer Maximum Performance ────
-            // This key is read by the Windows GPU scheduler for the D3D power
-            // policy. Value 1 = "Prefer Maximum Performance", 0 = "Adaptive".
-            EnsureRegistryKey(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\0000");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\0000",
-                "PerfLevelSrc", 0x3322, RegistryValueKind.DWord,
-                "GPU power: Prefer Maximum Performance (D3D)");
-
-            // Also apply via powercfg for the active scheme
-            RunCommand(
-                "powercfg -setacvalueindex SCHEME_CURRENT SUB_VIDEO VIDEOIDLE 0 & powercfg -setactive SCHEME_CURRENT",
-                "GPU power policy: prevent idle");
-
-            // ── NEW: Disable NVIDIA Telemetry services ────────────────────
-            // These services are installed by NVIDIA drivers and phone home
-            // with usage data. Safe to disable; drivers still function.
-            DisableService("NvTelemetryContainer");
-            DisableService("NvDisplayContainerLS");
-            DisableScheduledTask(@"\NvTmRepOnLogon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}");
-            DisableScheduledTask(@"\NvTmRep_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}");
-            DisableScheduledTask(@"\NvTmMon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}");
-        });
-
         public static List<TweakResult> UndoGamingTweaks()
         {
             var r = RestoreCategory("Gaming");
-            // Re-enable NVIDIA telemetry services (they default to auto)
             EnableService("NvTelemetryContainer");
             EnableService("NvDisplayContainerLS");
             return r;
         }
-
-        // ── 5. NETWORK ────────────────────────────────────────────────────
-        public static void ApplyNetworkTweaks() => RunCategory("Network", () =>
-        {
-            DisableNaglesAlgorithm();
-            RunCommand("netsh int tcp set global rss=enabled", "Enable RSS");
-            RunCommand("netsh int tcp set global autotuninglevel=normal", "TCP auto-tuning: normal");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
-                "NetworkThrottlingIndex", unchecked((int)0xffffffff), RegistryValueKind.DWord,
-                "Disable network throttling");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
-                "SystemResponsiveness", 0, RegistryValueKind.DWord,
-                "Max multimedia responsiveness");
-
-            // ── NEW: DNS over HTTPS → Cloudflare 1.1.1.1 ─────────────────
-            // Sets the DoH template for all adapters via the DNS Client policy key.
-            // The netsh command also enables DoH at the adapter level.
-            EnsureRegistryKey(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters",
-                "EnableAutoDoh", 2, RegistryValueKind.DWord,
-                "Enable DoH (auto-upgrade supported resolvers)");
-
-            // Register Cloudflare 1.1.1.1 as a known DoH server
-            EnsureRegistryKey(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters\DohWellKnownServers\1.1.1.1");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters\DohWellKnownServers\1.1.1.1",
-                "DohFlags", 3, RegistryValueKind.DWord,
-                "Register 1.1.1.1 as DoH server");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters\DohWellKnownServers\1.1.1.1",
-                "DohTemplate", "https://cloudflare-dns.com/dns-query", RegistryValueKind.String,
-                "Set Cloudflare DoH template");
-
-            // Also register 1.0.0.1 (Cloudflare secondary)
-            EnsureRegistryKey(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters\DohWellKnownServers\1.0.0.1");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters\DohWellKnownServers\1.0.0.1",
-                "DohFlags", 3, RegistryValueKind.DWord,
-                "Register 1.0.0.1 as DoH server (secondary)");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters\DohWellKnownServers\1.0.0.1",
-                "DohTemplate", "https://cloudflare-dns.com/dns-query", RegistryValueKind.String,
-                "Set Cloudflare DoH template (secondary)");
-
-            RunCommand("netsh dns set encryption preferred", "Prefer encrypted DNS");
-        });
 
         public static List<TweakResult> UndoNetworkTweaks()
         {
@@ -649,50 +411,7 @@ namespace Win11Optimizer
             return r;
         }
 
-        // ── 6. BLOATWARE ──────────────────────────────────────────────────
-        private static readonly HashSet<string> _safeList =
-            new(StringComparer.OrdinalIgnoreCase)
-        {
-            "Microsoft.WindowsStore", "Microsoft.Windows.Photos",
-            "Microsoft.WindowsCalculator", "Microsoft.WindowsNotepad",
-            "Microsoft.Paint", "Microsoft.ScreenSketch", "Microsoft.WindowsTerminal"
-        };
-
-        public static void RemoveBloatware(Action<string> logCallback)
-        {
-            string[] patterns =
-            {
-                "*BingNews*","*BingWeather*","*BingSearch*","*ZuneVideo*","*ZuneMusic*",
-                "*SkypeApp*","*SolitaireCollection*","*GetStarted*","*FeedbackHub*",
-                "*WindowsMaps*","*YourPhone*","*PhoneLink*","*Clipchamp*","*MixedReality*",
-                "*PowerAutomateDesktop*","*LinkedIn*","*Disney*","*Spotify*","*TikTok*",
-                "*Instagram*","*Facebook*","*OfficeHub*","*OneNote*","*People*",
-                "*ToDos*","*Todos*","*Widgets*","*Xbox.TCUI*","*XboxApp*",
-                "*XboxGameOverlay*","*XboxGamingOverlay*","*XboxSpeechToTextOverlay*",
-                "*3DViewer*","*Print3D*","*Wallet*","*Advertising*"
-            };
-            foreach (string pattern in patterns)
-            {
-                bool safe = false;
-                foreach (string s in _safeList)
-                    if (pattern.Contains(s, StringComparison.OrdinalIgnoreCase))
-                    { safe = true; break; }
-                if (safe) continue;
-
-                string name = pattern.Replace("*", "").Trim();
-                logCallback?.Invoke($"Removing {name}...");
-                RunPowerShell(
-                    $"Get-AppxPackage {pattern} | Remove-AppxPackage -ErrorAction SilentlyContinue",
-                    $"Remove (user) {name}");
-                RunPowerShell(
-                    $"Get-AppxProvisionedPackage -Online | Where-Object {{ $_.PackageName -like '{pattern}' }}" +
-                    $" | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue",
-                    $"Remove (provisioned) {name}");
-            }
-            logCallback?.Invoke("Bloatware removal complete.");
-        }
-
-        // ── 7. ADVANCED TWEAKS ────────────────────────────────────────────
+        // ── ADVANCED TWEAKS ───────────────────────────────────────────────
         public static void ApplyAdvancedTweaks(HashSet<string> selectedKeys)
             => RunCategory("Advanced", () =>
         {
@@ -755,73 +474,8 @@ namespace Win11Optimizer
             return r;
         }
 
-        // ── 8. SECURITY HARDENING ─────────────────────────────────────────
-        public static void ApplySecurityTweaks() => RunCategory("Security", () =>
-        {
-            // ── Disable AutoRun / AutoPlay on all drives ──────────────────
-            // NoDriveTypeAutoRun = 0xFF disables autorun for ALL drive types.
-            // AutoPlay policy key prevents the AutoPlay dialog from appearing.
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\IniFileMapping\Autorun.inf",
-                "(Default)", "@SYS:DoesNotExist", RegistryValueKind.String,
-                "Block Autorun.inf execution");
-            SetRegistry(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer",
-                "NoDriveTypeAutoRun", 0xFF, RegistryValueKind.DWord,
-                "Disable AutoRun on all drive types");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer",
-                "NoDriveTypeAutoRun", 0xFF, RegistryValueKind.DWord,
-                "Disable AutoRun (machine scope)");
-            EnsureRegistryKey(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer");
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer",
-                "NoAutoplayfornonVolume", 1, RegistryValueKind.DWord,
-                "Disable AutoPlay for non-volume devices");
-
-            // ── Disable Remote Desktop ────────────────────────────────────
-            // fDenyTSConnections = 1 refuses all incoming RDP connections.
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server",
-                "fDenyTSConnections", 1, RegistryValueKind.DWord,
-                "Disable Remote Desktop (RDP)");
-            RunCommand("netsh advfirewall firewall set rule group=\"Remote Desktop\" new enable=no 2>nul",
-                "Block RDP firewall rule");
-
-            // ── Disable SMBv1 ─────────────────────────────────────────────
-            // SMBv1 is the protocol exploited by WannaCry / EternalBlue.
-            // It should already be disabled on modern Windows but we enforce it.
-            RunPowerShell("Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force",
-                "Disable SMBv1 server");
-            RunCommand("sc config lanmanworkstation start=auto", "Ensure LanmanWorkstation (SMBv2+) stays enabled");
-            RunPowerShell("Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart",
-                "Remove SMBv1 Windows feature");
-
-            // ── Disable NetBIOS over TCP/IP ───────────────────────────────
-            // NetBIOS leaks the machine name and is a vector for NBNS poisoning.
-            // Setting NetbiosOptions = 2 disables it on all adapters.
-            RunPowerShell(
-                "Get-WmiObject Win32_NetworkAdapterConfiguration | " +
-                "Where-Object { $_.TcpipNetbiosOptions -ne $null } | " +
-                "ForEach-Object { $_.SetTcpipNetbios(2) }",
-                "Disable NetBIOS over TCP/IP (all adapters)");
-
-            // ── Ensure Windows Defender Real-Time Protection is ON ────────
-            SetRegistry(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender",
-                "DisableAntiSpyware", 0, RegistryValueKind.DWord,
-                "Ensure Defender: not disabled by policy");
-            SetRegistry(
-                @"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection",
-                "DisableRealtimeMonitoring", 0, RegistryValueKind.DWord,
-                "Ensure Defender real-time protection ON");
-            RunPowerShell("Set-MpPreference -DisableRealtimeMonitoring $false",
-                "Enable Defender real-time monitoring");
-        });
-
         public static List<TweakResult> UndoSecurityTweaks()
-        {
-            var r = RestoreCategory("Security");
-            // Re-enable RDP (restore to default disabled-by-default state
-            // means we just leave fDenyTSConnections=1, but if someone
-            // explicitly wants to undo, we restore from backup which had
-            // whatever their original value was)
-            return r;
-        }
+            => RestoreCategory("Security");
 
         // ── NAGLE'S ALGORITHM ─────────────────────────────────────────────
         public static void DisableNaglesAlgorithm()
@@ -1245,4 +899,3 @@ namespace Win11Optimizer
 
     }
 }
-// This line intentionally left blank - appending dispatch methods below

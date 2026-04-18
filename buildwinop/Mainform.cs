@@ -1572,20 +1572,6 @@ namespace Win11Optimizer
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    //  DARK RICH TEXT BOX
-    // ═══════════════════════════════════════════════════════════════════════
-    public class DarkRichTextBox : RichTextBox
-    {
-        [DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
-        private static extern int SetWindowTheme(IntPtr hwnd, string app, string id);
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
-            SetWindowTheme(Handle, "DarkMode_Explorer", null);
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
     //  ENTRY POINT
     // ═══════════════════════════════════════════════════════════════════════
     static class Program
