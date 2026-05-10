@@ -1,34 +1,38 @@
 # ⚡ Win11 Optimizer
 
 > A clean, open-source Windows 10/11 optimizer built in C# / WinForms.  
-> Designed to be dropped onto a fresh Windows install and run once to apply performance, privacy, gaming, network, and security tweaks — with full per-category undo support.
+> Designed to be dropped onto a fresh Windows install and run once to apply performance, privacy, gaming, network, and security tweaks — with full per-tweak undo support.
 
 **Version:** `1.1.0`  
 **Platform:** Windows 10 / 11 (64-bit)  
-**Runtime:** .NET 8 Desktop Runtime  
+**Runtime:** .NET 10 Desktop Runtime  
 **License:** MIT
 
 ---
 
-## What's New in v1.0.0
+## What's New in v1.1.0
 
-### 🚀 Startup Manager
-A full startup program manager integrated directly into Win11 Optimizer as a dedicated sidebar tab.
+### 🔍 Live System State Detection
+Win11 Optimizer now scans your system on startup and automatically detects tweaks that are already applied — even if you set them up manually before ever running the app. Detected tweaks show a purple **applied** indicator so you know exactly what's already done before you run anything.
 
-- Reads startup entries from all three standard Windows locations:
-  - `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` (current user registry)
-  - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run` (system-wide registry)
-  - User and common startup folders
-- Enable or disable individual startup entries using the same technique as Windows Task Manager (`StartupApproved\Run` binary key)
-- One-click **Enable All** / **Disable All** controls
-- Per-entry **impact indicator** (High / Medium / Low) based on known heavy hitters like OneDrive, Discord, Steam, Zoom, and Teams
-- Color-coded **source badges** — Registry (User), Registry (System), Startup Folder
-- **Delete** entries permanently with confirmation prompt
-- Startup folder items handled gracefully — disable is not supported by Windows for folder shortcuts, so the UI explains this and directs to Delete instead
-- **Refresh** button to reload the list at any time
+### 💾 Per-Tweak Applied State Persistence
+Applied state is now tracked at the individual tweak level, not just per category. Every tweak you apply is remembered across app restarts via `applied_tweaks.json`. Returning to the app after a reboot shows exactly which tweaks were already run.
 
-### 🎨 Full UI Rework — Corn Studios Design Language
-The entire application visual style has been reworked to match the [Corn Studios website](https://corn-studios.github.io) aesthetic.
+### 📦 Export & Import Tweak Profiles
+Save your current tweak selection to a `.w11profile` file and load it back on any machine. Profiles include a name, creation timestamp, and version — and the importer reports how many tweaks matched your current version when loading an older profile.
+
+### 🆕 What's New Dialog
+Win11 Optimizer now detects version changes on launch and offers to open the release notes on GitHub — so you always know what changed without having to go looking.
+
+### 🔧 Bug Fixes
+- Fixed GitHub button linking to the old personal repo instead of the Corn Studios org
+- Fixed `StartupApproved\Run32` registry key used for system startup entries — was silently failing to disable 64-bit HKLM startup entries; now correctly targets `StartupApproved\Run`
+- Fixed `ImplicitUsings` mismatch in the project file
+
+### ⚙ .NET 10 Migration
+Upgraded from .NET 8 to .NET 10.
+
+---
 
 ## Features
 
@@ -44,8 +48,11 @@ The entire application visual style has been reworked to match the [Corn Studios
 | ⚠ Advanced Tweaks | CPU scheduler tuning (Win32PrioritySeparation), disable dynamic tick, disable CPU throttling for background processes, ensure SSD TRIM is enabled, aggressive animation disabling |
 | 🚀 Startup Manager | View, enable, disable, and delete startup entries from registry and startup folders |
 
-### Per-Category Undo
-Every registry change is backed up before being applied. After running a category, an **↩ Undo Selected** button appears in the bottom bar — click it to fully restore that category to its pre-tweak state. Backups persist across app restarts via `tweaks_backup.json`.
+### Per-Tweak Undo
+Every registry change is backed up before being applied. After running tweaks, the **↩ Undo Selected** button in the bottom bar lets you fully restore any category to its pre-tweak state. Backups persist across app restarts via `tweaks_backup.json`.
+
+### Tweak Profiles
+Save and load your tweak selection as a `.w11profile` file using the **↑ Export Profile** and **↓ Import Profile** buttons in the bottom bar. Useful for setting up multiple machines or sharing a config.
 
 ---
 
@@ -84,12 +91,13 @@ Every registry change is backed up before being applied. After running a categor
 ## Notes
 
 - A **reboot is required** after applying tweaks for HAGS, timer resolution, and SMBv1 changes to take full effect
-- Bloatware removal cannot be undone — removed apps must be reinstalled from the Microsoft Store
+- Bloatware removal cannot be undone: removed apps must be reinstalled from the Microsoft Store
 - All registry changes are backed up to `tweaks_backup.json` next to the exe before being applied
-- Windows Recall tweaks are a no-op on non-Copilot+ PCs — safe to apply on any hardware
+- Applied tweak state is tracked per-tweak in `applied_tweaks.json` next to the exe
+- Windows Recall tweaks are a no-op on non-Copilot+ PCs: safe to apply on any hardware
 - NVIDIA telemetry tweaks are a no-op if NVIDIA drivers are not installed
 - The hosts file block list is cleanly removed by the Privacy undo function
-- Startup folder shortcuts cannot be disabled (Windows limitation) — only deleted
+- Startup folder shortcuts cannot be disabled (Windows limitation), only deleted
 
 ---
 
@@ -102,4 +110,4 @@ MIT — see [LICENSE](LICENSE)
 ## AI Disclosure
 
 > ⚠ This project contains code written with the assistance of **Claude by Anthropic** (claude.ai).  
-> Specifically, the **Startup Manager** feature (`StartupManager.cs`, `StartupTab.cs`) and the **v1.0.0 UI rework** were developed with Claude Sonnet. All code has been reviewed and tested by the project maintainer.
+> The **Startup Manager** feature and the **v1.0.0 UI rework** were developed with Claude Sonnet. All code has been reviewed and tested by the project maintainer.

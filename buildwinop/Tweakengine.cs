@@ -724,4 +724,309 @@ namespace Win11Optimizer
             });
         }
     }
+
+    // ── LIVE SYSTEM STATE DETECTOR ────────────────────────────────────────────
+    // Checks whether each tweak is already applied on the current system,
+    // independent of whether win11op has ever been run before.
+    // Returns: true  = already applied
+    //          false = not applied (Windows default)
+    //          null  = cannot determine (no readable state)
+
+    public static class TweakDetector
+    {
+        // Read a registry DWORD; returns null if key/value absent or unreadable
+        private static int? RegDWord(string keyPath, string valueName)
+        {
+            try
+            {
+                object val = Registry.GetValue(keyPath, valueName, null);
+                if (val is int i) return i;
+                if (val != null && int.TryParse(val.ToString(), out int parsed)) return parsed;
+                return null;
+            }
+            catch { return null; }
+        }
+
+        // Read a registry String; returns null if absent
+        private static string RegString(string keyPath, string valueName)
+        {
+            try { return Registry.GetValue(keyPath, valueName, null)?.ToString(); }
+            catch { return null; }
+        }
+
+        // Check Windows service start type via SC query
+        // Returns true if service is disabled
+        private static bool? ServiceDisabled(string serviceName)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo("sc.exe", $"qc {serviceName}")
+                {
+                    UseShellExecute = false, CreateNoWindow = true,
+                    RedirectStandardOutput = true, RedirectStandardError = true
+                };
+                using var p = Process.Start(psi);
+                string output = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();
+                if (output.Contains("DISABLED")) return true;
+                if (output.Contains("AUTO_START") || output.Contains("DEMAND_START") ||
+                    output.Contains("BOOT_START")  || output.Contains("SYSTEM_START"))
+                    return false;
+                return null;
+            }
+            catch { return null; }
+        }
+
+        // Check Nagle — look at first adapter subkey for TcpAckFrequency
+        private static bool? NagleDisabled()
+        {
+            try
+            {
+                using var baseKey = Registry.LocalMachine.OpenSubKey(
+                    @"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces");
+                if (baseKey == null) return null;
+                foreach (string sub in baseKey.GetSubKeyNames())
+                {
+                    using var subKey = baseKey.OpenSubKey(sub);
+                    var val = subKey?.GetValue("TcpAckFrequency");
+                    if (val != null) return (int)val == 1;
+                }
+                return false; // no adapters with the key = not applied
+            }
+            catch { return null; }
+        }
+
+        // Check hosts file for our block list marker
+        private static bool HostsBlockApplied()
+        {
+            try
+            {
+                string hostsPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.System),
+                    @"drivers\etc\hosts");
+                return File.Exists(hostsPath) &&
+                       File.ReadAllText(hostsPath).Contains("# WIN11OPTIMIZER_TELEMETRY_BLOCK_START");
+            }
+            catch { return false; }
+        }
+
+        public static bool? Check(string tweakKey)
+        {
+            try
+            {
+                return tweakKey switch
+                {
+                    // ── PERFORMANCE ───────────────────────────────────────────
+                    "Perf_PowerPlan" =>
+                        // Active power plan GUID readable from registry
+                        RegString(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\User\PowerSchemes",
+                            "ActivePowerScheme")
+                            ?.Equals("8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c", StringComparison.OrdinalIgnoreCase),
+
+                    "Perf_PowerThrottle" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling",
+                            "PowerThrottlingOff") == 1,
+
+                    "Perf_SysMain"  => ServiceDisabled("SysMain"),
+                    "Perf_WSearch"  => ServiceDisabled("WSearch"),
+
+                    "Perf_StartupDelay" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize",
+                            "StartupDelayInMSec") == 0,
+
+                    "Perf_VisualFX" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
+                            "VisualFXSetting") == 2,
+
+                    // fsutil disablelastaccess stores its state in registry
+                    "Perf_NtfsLastAccess" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem",
+                            "NtfsDisableLastAccessUpdate") is int v && (v & 1) == 1 ? true : false,
+
+                    // fsutil disable8dot3 → NtfsDisable8dot3NameCreation
+                    "Perf_8Dot3" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem",
+                            "NtfsDisable8dot3NameCreation") == 1,
+
+                    // Hibernation: HibernateEnabled = 0 means off
+                    "Perf_Hibernate" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power",
+                            "HibernateEnabled") == 0,
+
+                    "Perf_MemCompression" => null, // No reliable registry flag; MMAgent state not persisted
+
+                    "Perf_TimerRes" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel",
+                            "GlobalTimerResolutionRequests") == 1,
+
+                    // ── PRIVACY ───────────────────────────────────────────────
+                    "Priv_Telemetry" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection",
+                            "AllowTelemetry") == 0,
+
+                    "Priv_DiagTrack" => ServiceDisabled("DiagTrack"),
+
+                    "Priv_AdvertisingId" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo",
+                            "Enabled") == 0,
+
+                    "Priv_BingStart" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer",
+                            "DisableSearchBoxSuggestions") == 1,
+
+                    "Priv_Cortana" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search",
+                            "CortanaConsent") == 0,
+
+                    "Priv_ActivityFeed" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System",
+                            "EnableActivityFeed") == 0,
+
+                    "Priv_Location" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors",
+                            "DisableLocation") == 1,
+
+                    "Priv_Camera" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy",
+                            "LetAppsAccessCamera") == 2,
+
+                    "Priv_WER" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting",
+                            "Disabled") == 1,
+
+                    "Priv_SmartScreen" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System",
+                            "EnableSmartScreen") == 0,
+
+                    "Priv_TelemetryTasks" => null, // Scheduled task state not cleanly readable via registry
+
+                    "Priv_AppTracking" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
+                            "Start_TrackProgs") == 0,
+
+                    "Priv_Feedback" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Siuf\Rules",
+                            "NumberOfSIUFInPeriod") == 0,
+
+                    "Priv_ChatIcon" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
+                            "TaskbarMn") == 0,
+
+                    "Priv_Recall" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsAI",
+                            "DisableAIDataAnalysis") == 1,
+
+                    "Priv_HostsBlock" => HostsBlockApplied(),
+
+                    // ── RESPONSIVENESS ────────────────────────────────────────
+                    "Resp_MenuDelay" =>
+                        RegString(@"HKEY_CURRENT_USER\Control Panel\Desktop", "MenuShowDelay") == "0",
+
+                    "Resp_AppKill" =>
+                        RegString(@"HKEY_CURRENT_USER\Control Panel\Desktop", "WaitToKillAppTimeout") == "2000",
+
+                    "Resp_ServiceKill" =>
+                        RegString(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control",
+                            "WaitToKillServiceTimeout") == "2000",
+
+                    "Resp_AutoEndTasks" =>
+                        RegString(@"HKEY_CURRENT_USER\Control Panel\Desktop", "AutoEndTasks") == "1",
+
+                    "Resp_PlatformTick" => null, // BCD store not readable via managed registry API
+
+                    "Resp_WinTips" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                            "SoftLandingEnabled") == 0,
+
+                    "Resp_SuggestedContent" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager",
+                            "SubscribedContent-338389Enabled") == 0,
+
+                    // ── GAMING ────────────────────────────────────────────────
+                    "Game_HAGS" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers",
+                            "HwSchMode") == 2,
+
+                    "Game_GameMode" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\GameBar", "AllowAutoGameMode") == 1,
+
+                    "Game_MouseAccel" =>
+                        RegString(@"HKEY_CURRENT_USER\Control Panel\Mouse", "MouseSpeed") == "0" &&
+                        RegString(@"HKEY_CURRENT_USER\Control Panel\Mouse", "MouseThreshold1") == "0" &&
+                        RegString(@"HKEY_CURRENT_USER\Control Panel\Mouse", "MouseThreshold2") == "0",
+
+                    "Game_CPUPriority" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl",
+                            "Win32PrioritySeparation") == 38,
+
+                    "Game_DVR" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\GameDVR",
+                            "AppCaptureEnabled") == 0,
+
+                    "Game_FSO" =>
+                        RegDWord(@"HKEY_CURRENT_USER\System\GameConfigStore", "GameDVR_FSEBehaviorMode") == 2,
+
+                    "Game_GPUPower" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\0000",
+                            "PerfLevelSrc") == 0x3322,
+
+                    "Game_NvidiaTelemetry" => ServiceDisabled("NvTelemetryContainer"),
+
+                    // ── NETWORK ───────────────────────────────────────────────
+                    "Net_Nagle"       => NagleDisabled(),
+                    "Net_RSS"         => null, // netsh global state not in registry
+                    "Net_TCPAutoTune" => null, // netsh global state not in registry
+
+                    "Net_Throttle" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
+                            "NetworkThrottlingIndex") == unchecked((int)0xffffffff),
+
+                    "Net_MMResponsive" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile",
+                            "SystemResponsiveness") == 0,
+
+                    "Net_DoH" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters",
+                            "EnableAutoDoh") == 2,
+
+                    // ── BLOATWARE ─────────────────────────────────────────────
+                    // AppX removal state is not reliable to check via registry — skip
+                    "Bloat_Bing" or "Bloat_Zune" or "Bloat_Solitaire" or "Bloat_Maps" or
+                    "Bloat_PhoneLink" or "Bloat_Clipchamp" or "Bloat_Xbox" or
+                    "Bloat_AdTiles" or "Bloat_Office" or "Bloat_3D" => null,
+
+                    // ── SECURITY ──────────────────────────────────────────────
+                    "Sec_AutoRun" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer",
+                            "NoDriveTypeAutoRun") == 0xFF,
+
+                    "Sec_RDP" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server",
+                            "fDenyTSConnections") == 1,
+
+                    "Sec_SMBv1"   => null, // Windows Optional Feature state — not trivially readable
+                    "Sec_NetBIOS" => null, // WMI adapter config — not suitable for startup scan
+                    "Sec_Defender" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender",
+                            "DisableAntiSpyware") == 0,
+
+                    // ── ADVANCED ──────────────────────────────────────────────
+                    "Adv_ProcessorScheduling" =>
+                        RegDWord(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl",
+                            "Win32PrioritySeparation") == 38,
+
+                    "Adv_DynamicTick"  => null, // BCD store
+                    "Adv_CPUThrottle"  => null, // powercfg scheme — no clean registry check
+                    "Adv_TRIM"         => null, // fsutil disabledeletenotify — no clean registry equivalent
+
+                    "Adv_Animations" =>
+                        RegDWord(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
+                            "TaskbarAnimations") == 0,
+
+                    _ => null
+                };
+            }
+            catch { return null; }
+        }
+    }
 }
