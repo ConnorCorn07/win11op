@@ -68,7 +68,7 @@ namespace Win11Optimizer
 
         // Windows stores disabled startup entries here (same technique as Task Manager)
         private const string ApprovedKeyUser    = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
-        private const string ApprovedKeyMachine = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run32";
+        private const string ApprovedKeyMachine = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
 
         // Startup folder paths
         private static string UserStartupFolder =>

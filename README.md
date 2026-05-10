@@ -3,7 +3,7 @@
 > A clean, open-source Windows 10/11 optimizer built in C# / WinForms.  
 > Designed to be dropped onto a fresh Windows install and run once to apply performance, privacy, gaming, network, and security tweaks — with full per-category undo support.
 
-**Version:** `1.0.0`  
+**Version:** `1.1.0`  
 **Platform:** Windows 10 / 11 (64-bit)  
 **Runtime:** .NET 8 Desktop Runtime  
 **License:** MIT
@@ -52,7 +52,7 @@ Every registry change is backed up before being applied. After running a categor
 ## Requirements
 
 - Windows 10 or 11 (64-bit)
-- [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
 - Administrator privileges (required for registry, service, and hosts file changes)
 
 ---
@@ -64,7 +64,7 @@ Every registry change is backed up before being applied. After running a categor
 
 ## Build from Source
 
-1. Install the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+1. Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 2. Clone the repo:
    ```
    git clone https://github.com/Corn-Studios/win11op.git
@@ -76,7 +76,7 @@ Every registry change is backed up before being applied. After running a categor
    ```
 4. Run as Administrator:
    ```
-   bin\Release\net8.0-windows\Win11Optimizer.exe
+   bin\Release\net10.0-windows\Win11Optimizer.exe
    ```
 
 ---

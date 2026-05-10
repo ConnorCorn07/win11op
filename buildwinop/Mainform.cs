@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -613,7 +614,7 @@ private void BuildTopBar()
             ghLink.FlatAppearance.BorderSize         = 0;
             ghLink.FlatAppearance.MouseOverBackColor = Theme.ACCENT_HOV;
             ghLink.Click += (s, e) => Process.Start(new ProcessStartInfo
-                { FileName = "https://github.com/ConnorCorn07/win11op", UseShellExecute = true });
+                { FileName = "https://github.com/Corn-Studios/win11op", UseShellExecute = true });
             _topBar.SizeChanged += (s, e) =>
                 ghLink.Location = new Point(_topBar.Width - ghLink.Width - 16, (_topBar.Height - ghLink.Height) / 2);
 
@@ -1769,6 +1770,7 @@ private void SetStatus(string msg, Color col = default)
         public TweakEntry Entry { get; }
         public event EventHandler CheckedChanged;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsChecked
         {
             get => _checked;
